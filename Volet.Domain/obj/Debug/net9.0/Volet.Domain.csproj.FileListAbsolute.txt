@@ -1,12 +1,13 @@
-F:\Volet\Volet.Domain\bin\Debug\net9.0\Volet.Domain.deps.json
-F:\Volet\Volet.Domain\bin\Debug\net9.0\Volet.Domain.dll
-F:\Volet\Volet.Domain\bin\Debug\net9.0\Volet.Domain.pdb
+F:\Volet\Volet.Domain\obj\Debug\net9.0\Volet.Domain.csproj.AssemblyReference.cache
 F:\Volet\Volet.Domain\obj\Debug\net9.0\Volet.Domain.GeneratedMSBuildEditorConfig.editorconfig
 F:\Volet\Volet.Domain\obj\Debug\net9.0\Volet.Domain.AssemblyInfoInputs.cache
 F:\Volet\Volet.Domain\obj\Debug\net9.0\Volet.Domain.AssemblyInfo.cs
 F:\Volet\Volet.Domain\obj\Debug\net9.0\Volet.Domain.csproj.CoreCompileInputs.cache
+F:\Volet\Volet.Domain\obj\Debug\net9.0\Volet.Domain.sourcelink.json
+F:\Volet\Volet.Domain\bin\Debug\net9.0\Volet.Domain.deps.json
+F:\Volet\Volet.Domain\bin\Debug\net9.0\Volet.Domain.dll
+F:\Volet\Volet.Domain\bin\Debug\net9.0\Volet.Domain.pdb
 F:\Volet\Volet.Domain\obj\Debug\net9.0\Volet.Domain.dll
 F:\Volet\Volet.Domain\obj\Debug\net9.0\refint\Volet.Domain.dll
 F:\Volet\Volet.Domain\obj\Debug\net9.0\Volet.Domain.pdb
 F:\Volet\Volet.Domain\obj\Debug\net9.0\ref\Volet.Domain.dll
-F:\Volet\Volet.Domain\obj\Debug\net9.0\Volet.Domain.sourcelink.json
