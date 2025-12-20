@@ -1,0 +1,146 @@
+{
+  "version": 3,
+  "targets": {
+    "net9.0": {
+      "Volet.Application/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v9.0",
+        "dependencies": {
+          "Volet.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/Volet.Application.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Volet.Application.dll": {}
+        }
+      },
+      "Volet.Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v9.0",
+        "compile": {
+          "bin/placeholder/Volet.Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Volet.Domain.dll": {}
+        }
+      },
+      "Volet.Infrastructure/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v9.0",
+        "dependencies": {
+          "Volet.Application": "1.0.0",
+          "Volet.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/Volet.Infrastructure.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Volet.Infrastructure.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Volet.Application/1.0.0": {
+      "type": "project",
+      "path": "../Volet.Application/Volet.Application.csproj",
+      "msbuildProject": "../Volet.Application/Volet.Application.csproj"
+    },
+    "Volet.Domain/1.0.0": {
+      "type": "project",
+      "path": "../Volet.Domain/Volet.Domain.csproj",
+      "msbuildProject": "../Volet.Domain/Volet.Domain.csproj"
+    },
+    "Volet.Infrastructure/1.0.0": {
+      "type": "project",
+      "path": "../Volet.Infrastructure/Volet.Infrastructure.csproj",
+      "msbuildProject": "../Volet.Infrastructure/Volet.Infrastructure.csproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net9.0": [
+      "Volet.Application >= 1.0.0",
+      "Volet.Infrastructure >= 1.0.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\ABDULLAH AL MAMUN\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "F:\\Volet\\Volet.Web\\Volet.Web.csproj",
+      "projectName": "Volet.Web",
+      "projectPath": "F:\\Volet\\Volet.Web\\Volet.Web.csproj",
+      "packagesPath": "C:\\Users\\ABDULLAH AL MAMUN\\.nuget\\packages\\",
+      "outputPath": "F:\\Volet\\Volet.Web\\obj\\",
+      "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\ABDULLAH AL MAMUN\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net9.0"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "projectReferences": {
+            "F:\\Volet\\Volet.Application\\Volet.Application.csproj": {
+              "projectPath": "F:\\Volet\\Volet.Application\\Volet.Application.csproj"
+            },
+            "F:\\Volet\\Volet.Infrastructure\\Volet.Infrastructure.csproj": {
+              "projectPath": "F:\\Volet\\Volet.Infrastructure\\Volet.Infrastructure.csproj"
+            }
+          }
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "9.0.300"
+    },
+    "frameworks": {
+      "net9.0": {
+        "targetAlias": "net9.0",
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.AspNetCore.App": {
+            "privateAssets": "none"
+          },
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.308/PortableRuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}
