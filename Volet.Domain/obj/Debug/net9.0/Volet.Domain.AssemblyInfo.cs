@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Volet.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fe7dd58a750bb849803268a1563d87f181cde40e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ac5dc777370da213702a622d1ff18e2c6f8de10b")]
 [assembly: System.Reflection.AssemblyProductAttribute("Volet.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Volet.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

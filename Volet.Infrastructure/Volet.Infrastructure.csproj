@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Volet.Application\Volet.Application.csproj" />
     <ProjectReference Include="..\Volet.Domain\Volet.Domain.csproj" />
   </ItemGroup>
 

@@ -16,3 +16,5 @@ F:\Volet\Volet.Infrastructure\bin\Debug\net9.0\Volet.Domain.pdb
 F:\Volet\Volet.Infrastructure\obj\Debug\net9.0\Volet.In.6607274C.Up2Date
 F:\Volet\Volet.Infrastructure\bin\Debug\net9.0\Volet.Infrastructure.runtimeconfig.json
 F:\Volet\Volet.Infrastructure\obj\Debug\net9.0\Volet.Infrastructure.genruntimeconfig.cache
+F:\Volet\Volet.Infrastructure\bin\Debug\net9.0\Volet.Application.dll
+F:\Volet\Volet.Infrastructure\bin\Debug\net9.0\Volet.Application.pdb

@@ -1642,6 +1642,19 @@
           }
         }
       },
+      "Volet.Application/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v9.0",
+        "dependencies": {
+          "Volet.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/Volet.Application.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Volet.Application.dll": {}
+        }
+      },
       "Volet.Domain/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v9.0",
@@ -4607,6 +4620,11 @@
         "useSharedDesignerContext.txt"
       ]
     },
+    "Volet.Application/1.0.0": {
+      "type": "project",
+      "path": "../Volet.Application/Volet.Application.csproj",
+      "msbuildProject": "../Volet.Application/Volet.Application.csproj"
+    },
     "Volet.Domain/1.0.0": {
       "type": "project",
       "path": "../Volet.Domain/Volet.Domain.csproj",
@@ -4620,6 +4638,7 @@
       "Microsoft.EntityFrameworkCore >= 9.0.0",
       "Microsoft.EntityFrameworkCore.SqlServer >= 9.0.0",
       "Microsoft.EntityFrameworkCore.Tools >= 9.0.0",
+      "Volet.Application >= 1.0.0",
       "Volet.Domain >= 1.0.0"
     ]
   },
@@ -4655,6 +4674,9 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
+            "F:\\Volet\\Volet.Application\\Volet.Application.csproj": {
+              "projectPath": "F:\\Volet\\Volet.Application\\Volet.Application.csproj"
+            },
             "F:\\Volet\\Volet.Domain\\Volet.Domain.csproj": {
               "projectPath": "F:\\Volet\\Volet.Domain\\Volet.Domain.csproj"
             }

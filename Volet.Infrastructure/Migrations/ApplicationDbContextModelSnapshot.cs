@@ -17,7 +17,7 @@ namespace Volet.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0-preview.2.24128.4")
+                .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -177,6 +177,15 @@ namespace Volet.Infrastructure.Migrations
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("HasAcceptedNewsletterAndAnalytics")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("HasAcceptedPrivacyPolicy")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("HasAcceptedUserAgreement")
+                        .HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .IsRequired()

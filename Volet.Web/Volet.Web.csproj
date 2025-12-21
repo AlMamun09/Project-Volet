@@ -7,10 +7,18 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="EmailTemplates\**" />
+	  <Content Remove="EmailTemplates\**" />
+	  <EmbeddedResource Remove="EmailTemplates\**" />
+	  <None Remove="EmailTemplates\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
 	</ItemGroup>
 
 	<ItemGroup>

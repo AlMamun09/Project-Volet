@@ -172,6 +172,9 @@
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
+              "F:\\Volet\\Volet.Application\\Volet.Application.csproj": {
+                "projectPath": "F:\\Volet\\Volet.Application\\Volet.Application.csproj"
+              },
               "F:\\Volet\\Volet.Domain\\Volet.Domain.csproj": {
                 "projectPath": "F:\\Volet\\Volet.Domain\\Volet.Domain.csproj"
               }
@@ -295,6 +298,10 @@
               "suppressParent": "All",
               "target": "Package",
               "version": "[9.0.0, )"
+            },
+            "Swashbuckle.AspNetCore": {
+              "target": "Package",
+              "version": "[6.9.0, )"
             }
           },
           "imports": [
