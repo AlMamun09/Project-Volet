@@ -1,0 +1,615 @@
+﻿@{
+    Layout = null;
+    ViewData["Title"] = "Register";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sign up - Volet</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        :root {
+            --bg: #0b0f14;
+            --panel: #0f1720;
+            --panel2: #0d141c;
+            --line: rgba(255,255,255,.10);
+            --text: rgba(255,255,255,.92);
+            --muted: rgba(255,255,255,.62);
+            --muted2: rgba(255,255,255,.42);
+            --accent: #28e0a3;
+        }
+
+        html, body {
+            height: 100%
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+            background: radial-gradient(1200px 600px at 50% -20%, rgba(40,224,163,.10), transparent 55%), var(--bg);
+            color: var(--text);
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none
+        }
+
+            a:hover {
+                text-decoration: underline;
+                color: var(--accent)
+            }
+
+        .auth-shell {
+            min-height: 100%;
+            display: flex;
+            flex-direction: column
+        }
+
+        .topbar {
+            padding: 28px 40px
+        }
+
+        .brand {
+            font-weight: 800;
+            letter-spacing: .4px;
+            font-size: 28px;
+            color: #fff
+        }
+
+        .auth-main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 18px 40px
+        }
+
+        .auth-grid {
+            width: min(1180px,100%);
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 34px;
+            align-items: start;
+        }
+
+        @@media (min-width:992px) {
+            .auth-grid {
+                grid-template-columns: 1.05fr .95fr
+            }
+        }
+
+        .headline {
+            font-size: clamp(34px,3.2vw,54px);
+            font-weight: 800;
+            margin: 0 0 18px 0;
+            letter-spacing: -.02em;
+        }
+
+        .panel {
+            background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.35);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 28px;
+            border-bottom: 1px solid var(--line);
+            margin-bottom: 18px;
+        }
+
+        .tab {
+            padding: 10px 0;
+            color: rgba(255,255,255,.55);
+            font-weight: 700;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+        }
+
+            .tab.active {
+                color: #fff
+            }
+
+                .tab.active::after {
+                    content: '';
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    bottom: -1px;
+                    height: 2px;
+                    background: rgba(255,255,255,.85);
+                }
+
+        .form-label {
+            color: var(--muted2);
+            font-size: 12px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .field {
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--line);
+            color: var(--text);
+            padding: 12px 14px;
+            border-radius: 10px;
+            outline: none;
+        }
+
+            .field:focus {
+                border-color: rgba(40,224,163,.6);
+                box-shadow: 0 0 0 3px rgba(40,224,163,.12)
+            }
+
+        .slider-wrap {
+            margin-top: 8px;
+            padding-top: 12px;
+            border-top: 1px solid var(--line);
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .lock {
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            display: grid;
+            place-items: center;
+            color: rgba(255,255,255,.75);
+            background: rgba(255,255,255,.03);
+            flex: 0 0 auto;
+        }
+
+        .range {
+            width: 100%;
+            accent-color: var(--accent);
+        }
+
+        .slider-hint {
+            color: var(--muted2);
+            font-size: 12px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .checks {
+            margin-top: 14px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .checkline {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+            .checkline input {
+                margin-top: 4px;
+                width: 18px;
+                height: 18px;
+                accent-color: var(--accent);
+            }
+
+        .btn-auth {
+            width: 100%;
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-weight: 800;
+            letter-spacing: .02em;
+            border: 1px solid rgba(255,255,255,.12);
+            background: rgba(255,255,255,.18);
+            color: rgba(255,255,255,.72);
+            margin-top: 14px;
+        }
+
+            .btn-auth:disabled {
+                opacity: .6;
+                cursor: not-allowed
+            }
+
+        .below {
+            margin-top: 14px;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .features {
+            padding: 6px 0;
+        }
+
+            .features h3 {
+                font-weight: 800;
+                margin: 0 0 18px 0;
+            }
+
+        .feature {
+            display: flex;
+            gap: 12px;
+            margin: 14px 0;
+            align-items: flex-start;
+        }
+
+        .tick {
+            width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            background: rgba(40,224,163,.18);
+            border: 1px solid rgba(40,224,163,.25);
+            display: grid;
+            place-items: center;
+            color: var(--accent);
+            font-weight: 900;
+            flex: 0 0 auto;
+            margin-top: 2px;
+        }
+
+        .ft-title {
+            font-weight: 800;
+            margin: 0
+        }
+
+        .ft-sub {
+            color: var(--muted);
+            margin: 2px 0 0 0;
+            font-size: 14px
+        }
+
+        .alertbox {
+            display: none;
+            border-radius: 12px;
+            padding: 12px 14px;
+            border: 1px solid var(--line);
+            margin: 10px 0 14px;
+            font-weight: 600;
+        }
+
+        .alert-success {
+            display: block;
+            background: rgba(40,224,163,.10);
+            border-color: rgba(40,224,163,.25)
+        }
+
+        .alert-error {
+            display: block;
+            background: rgba(255,80,80,.10);
+            border-color: rgba(255,80,80,.25)
+        }
+
+        .footer {
+            border-top: 1px solid var(--line);
+            padding: 18px 40px;
+            color: var(--muted2);
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap
+        }
+
+        .badge-row {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            opacity: .7
+        }
+
+        .badge {
+            border: 1px solid var(--line);
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-weight: 700;
+            letter-spacing: .02em;
+            color: rgba(255,255,255,.72);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-shell">
+        <div class="topbar">
+            <div class="brand">volet</div>
+        </div>
+
+        <div class="auth-main">
+            <div class="auth-grid">
+                <!-- LEFT: FORM -->
+                <div>
+                    <h1 class="headline">Sign up now. It’s free!</h1>
+
+                    <div id="alertBox" class="alertbox"></div>
+
+                    <div class="panel">
+                        <div class="tabs" role="tablist" aria-label="Account type">
+                            <div class="tab active" id="tabPersonal" data-type="personal">Personal</div>
+                            <div class="tab" id="tabBusiness" data-type="business">Business</div>
+                        </div>
+
+                        <form id="registerForm" autocomplete="off">
+                            <input type="hidden" id="accountType" value="personal" />
+
+                            <div class="mb-3">
+                                <div class="form-label">First Name</div>
+                                <input class="field" type="text" id="firstName" required />
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-label">Last Name</div>
+                                <input class="field" type="text" id="lastName" required />
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-label">Email</div>
+                                <input class="field" type="email" id="email" required />
+                            </div>
+
+                            <div class="mb-2">
+                                <div class="form-label">New Password</div>
+                                <input class="field" type="password" id="password" minlength="8" required />
+                            </div>
+
+                            <div class="slider-wrap">
+                                <div class="slider-hint">Drag slider to the right</div>
+                                <div class="slider-row">
+                                    <div class="lock" id="lockIcon" title="Verification slider">
+                                        <!-- simple lock icon -->
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M7 10V8a5 5 0 0 1 10 0v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                            <path d="M6 10h12v10H6V10Z" stroke="currentColor" stroke-width="2" />
+                                        </svg>
+                                    </div>
+                                    <input class="range" id="verifySlider" type="range" min="0" max="100" value="0" />
+                                </div>
+                                <div class="mt-2" style="color:var(--muted2);font-size:13px;">
+                                    Slide to unlock registration.
+                                </div>
+                            </div>
+
+                            <div class="checks">
+                                <label class="checkline">
+                                    <input type="checkbox" id="agreeUser" />
+                                    <span>I have read and accept the <a href="#" onclick="return false;">User Agreement</a>.</span>
+                                </label>
+                                <label class="checkline">
+                                    <input type="checkbox" id="agreePrivacy" />
+                                    <span>I have read the <a href="#" onclick="return false;">Privacy policy</a> and I agree with its terms.</span>
+                                </label>
+                                <label class="checkline">
+                                    <input type="checkbox" id="agreeNews" />
+                                    <span>I would like to get news and special offers via email. I’m okay with analytics and tracking tools used to measure newsletter performance.</span>
+                                </label>
+                            </div>
+
+                            <button class="btn-auth" id="registerBtn" type="submit" disabled>REGISTER</button>
+
+                            <div class="below">
+                                Already have an account?
+                                <a href="/login">Log In</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- RIGHT: FEATURES -->
+                <div class="features">
+                    <h3>Discover all the things you can do with Volet.com!</h3>
+
+                    <div class="feature">
+                        <div class="tick">✓</div>
+                        <div>
+                            <p class="ft-title">Deposit/withdraw worldwide</p>
+                            <p class="ft-sub">Local and international features</p>
+                        </div>
+                    </div>
+
+                    <div class="feature">
+                        <div class="tick">✓</div>
+                        <div>
+                            <p class="ft-title">Easily switch between currencies</p>
+                            <p class="ft-sub">9+ currencies, great exchange rate</p>
+                        </div>
+                    </div>
+
+                    <div class="feature">
+                        <div class="tick">✓</div>
+                        <div>
+                            <p class="ft-title">Send/receive for free</p>
+                            <p class="ft-sub">Instant P2P transfers for 0%</p>
+                        </div>
+                    </div>
+
+                    <div class="feature">
+                        <div class="tick">✓</div>
+                        <div>
+                            <p class="ft-title">Spend anywhere with Volet.com cards*</p>
+                            <p class="ft-sub">Plastic/virtual cards in USD/EUR</p>
+                        </div>
+                    </div>
+
+                    <div class="feature">
+                        <div class="tick">✓</div>
+                        <div>
+                            <p class="ft-title">Crypto: buy, sell, manage seamlessly</p>
+                            <p class="ft-sub">Hold, send, receive coins in your account</p>
+                        </div>
+                    </div>
+
+                    <div class="feature">
+                        <div class="tick">✓</div>
+                        <div>
+                            <p class="ft-title">Make $ with our referral program</p>
+                            <p class="ft-sub">Get paid for active referrals, lifetime</p>
+                        </div>
+                    </div>
+
+                    <div class="feature">
+                        <div class="tick">✓</div>
+                        <div>
+                            <p class="ft-title">Get help 24/7, live operators</p>
+                            <p class="ft-sub">Online chat, tickets, FAQ</p>
+                        </div>
+                    </div>
+
+                    <div class="feature">
+                        <div class="tick">✓</div>
+                        <div>
+                            <p class="ft-title">…and more!</p>
+                            <p class="ft-sub">We add new features regularly.</p>
+                        </div>
+                    </div>
+
+                    <div style="color:var(--muted2);font-size:12px;margin-top:14px;">
+                        * Availability depending on region.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div>
+                Queensland Foreign Exchange Inc. — Toronto, Ontario, Canada<br />
+                Second February Limitada — Republic of Costa Rica<br />
+                © 2025 Volet.com
+            </div>
+
+            <div class="footer-links">
+                <a href="#" onclick="return false;">Cookies Policy</a>
+                <a href="#" onclick="return false;">AML Program</a>
+                <a href="#" onclick="return false;">Privacy Policy</a>
+                <a href="#" onclick="return false;">Terms and Conditions</a>
+            </div>
+
+            <div class="badge-row">
+                <span class="badge">PCI DSS</span>
+                <span class="badge">Mastercard</span>
+                <span class="badge">VISA</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const alertBox = document.getElementById('alertBox');
+        const registerBtn = document.getElementById('registerBtn');
+        const slider = document.getElementById('verifySlider');
+
+        let sliderVerified = false;
+
+        function showAlert(type, msg) {
+            alertBox.className = 'alertbox ' + (type === 'success' ? 'alert-success' : 'alert-error');
+            alertBox.textContent = msg;
+        }
+
+        function setTab(type) {
+            document.getElementById('accountType').value = type;
+            document.getElementById('tabPersonal').classList.toggle('active', type === 'personal');
+            document.getElementById('tabBusiness').classList.toggle('active', type === 'business');
+        }
+
+        document.getElementById('tabPersonal').addEventListener('click', () => setTab('personal'));
+        document.getElementById('tabBusiness').addEventListener('click', () => setTab('business'));
+
+        function canEnableRegister() {
+            const fn = document.getElementById('firstName').value.trim();
+            const ln = document.getElementById('lastName').value.trim();
+            const em = document.getElementById('email').value.trim();
+            const pw = document.getElementById('password').value;
+
+            const ua = document.getElementById('agreeUser').checked;
+            const pp = document.getElementById('agreePrivacy').checked;
+
+            return fn && ln && em && pw.length >= 8 && ua && pp && sliderVerified;
+        }
+
+        function updateBtn() {
+            registerBtn.disabled = !canEnableRegister();
+        }
+
+        ['firstName','lastName','email','password','agreeUser','agreePrivacy','agreeNews'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updateBtn);
+            document.getElementById(id).addEventListener('change', updateBtn);
+        });
+
+        slider.addEventListener('input', () => {
+            const v = Number(slider.value || 0);
+            if (v >= 98) {
+                sliderVerified = true;
+                slider.value = 100;
+            } else {
+                sliderVerified = false;
+            }
+            updateBtn();
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            registerBtn.disabled = true;
+
+            try {
+                const payload = {
+                    firstName: document.getElementById('firstName').value.trim(),
+                    lastName: document.getElementById('lastName').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    password: document.getElementById('password').value,
+                    hasAcceptedUserAgreement: document.getElementById('agreeUser').checked,
+                    hasAcceptedPrivacyPolicy: document.getElementById('agreePrivacy').checked,
+                    hasAcceptedNewsletterAndAnalytics: document.getElementById('agreeNews').checked
+                };
+
+                const res = await fetch('/api/Auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    showAlert('error', data?.message || data?.Message || 'Registration failed.');
+                    updateBtn();
+                    return;
+                }
+
+                showAlert('success', data?.Message || 'User created successfully! Please check your email to confirm your account.');
+                // Optional: go to login after a short delay
+                setTimeout(() => { window.location.href = '/login'; }, 1200);
+            } catch (err) {
+                showAlert('error', 'Registration failed. Please try again.');
+            } finally {
+                updateBtn();
+            }
+        });
+
+        updateBtn();
+    </script>
+</body>
+</html>
