@@ -1,0 +1,412 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "Setup Authenticator";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - Volet</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        :root{
+            --bg:#0b0f14;
+            --panel:#0f1720;
+            --line:rgba(255,255,255,.10);
+            --text:rgba(255,255,255,.92);
+            --muted:rgba(255,255,255,.62);
+            --muted2:rgba(255,255,255,.42);
+            --accent:#28e0a3;
+        }
+
+        html,body{height:100%}
+        body{
+            margin:0;
+            font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+            background: radial-gradient(1200px 600px at 50% -20%, rgba(40,224,163,.10), transparent 55%), var(--bg);
+            color:var(--text);
+        }
+        a{color:var(--accent);text-decoration:none}
+        a:hover{text-decoration:underline}
+
+        .container{max-width:600px;margin:0 auto;padding:40px 20px}
+        .topbar{padding:28px 40px}
+        .brand{font-weight:800;letter-spacing:.4px;font-size:28px;color:#fff}
+
+        .headline{
+            font-size:32px;
+            font-weight:800;
+            margin:0 0 12px 0;
+            letter-spacing:-.02em;
+        }
+        .subtitle{color:var(--muted);margin:0 0 30px 0}
+
+        .panel{
+            background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+            border:1px solid var(--line);
+            border-radius:16px;
+            padding:28px;
+            box-shadow:0 20px 60px rgba(0,0,0,.35);
+            margin-bottom:20px;
+        }
+
+        .step{
+            display:flex;
+            gap:16px;
+            margin-bottom:24px;
+        }
+        .step-number{
+            width:32px;
+            height:32px;
+            background:var(--accent);
+            color:#000;
+            border-radius:50%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:700;
+            font-size:14px;
+            flex-shrink:0;
+        }
+        .step-content{flex:1}
+        .step-title{font-weight:700;margin:0 0 6px 0;font-size:16px}
+        .step-text{color:var(--muted);margin:0;font-size:14px;line-height:1.5}
+
+        .qr-container{
+            background:#fff;
+            padding:20px;
+            border-radius:12px;
+            display:inline-block;
+            margin:16px 0;
+        }
+        .qr-container img{display:block;width:200px;height:200px}
+
+        .manual-key{
+            background:rgba(255,255,255,.05);
+            border:1px solid var(--line);
+            border-radius:8px;
+            padding:12px 16px;
+            font-family:monospace;
+            font-size:16px;
+            letter-spacing:2px;
+            margin:12px 0;
+            word-break:break-all;
+        }
+
+        .form-label{
+            color:var(--muted2);
+            font-size:12px;
+            letter-spacing:.08em;
+            text-transform:uppercase;
+            margin-bottom:8px;
+        }
+        .field{
+            width:100%;
+            background:transparent;
+            border:1px solid var(--line);
+            color:var(--text);
+            padding:12px 14px;
+            border-radius:10px;
+            outline:none;
+        }
+        .field:focus{border-color:rgba(40,224,163,.6);box-shadow:0 0 0 3px rgba(40,224,163,.12)}
+
+        .otp-input{
+            font-size:32px;
+            letter-spacing:12px;
+            text-align:center;
+            font-weight:700;
+        }
+
+        .btn{
+            border-radius:10px;
+            padding:12px 24px;
+            font-weight:700;
+            letter-spacing:.02em;
+            border:none;
+            cursor:pointer;
+            transition:all 0.2s ease;
+        }
+        .btn-primary{
+            background:var(--accent);
+            color:#000;
+        }
+        .btn-primary:hover{filter:brightness(1.1)}
+        .btn-primary:disabled{opacity:.65;cursor:not-allowed}
+        .btn-secondary{
+            background:rgba(255,255,255,.1);
+            color:var(--text);
+            border:1px solid var(--line);
+        }
+        .btn-secondary:hover{background:rgba(255,255,255,.15)}
+
+        .back-link{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            color:var(--muted);
+            font-size:14px;
+            margin-bottom:20px;
+        }
+        .back-link:hover{color:var(--text);text-decoration:none}
+
+        .loading{
+            display:none;
+            text-align:center;
+            padding:40px;
+        }
+        .loading.active{display:block}
+        .spinner{
+            width:40px;
+            height:40px;
+            border:3px solid var(--line);
+            border-top-color:var(--accent);
+            border-radius:50%;
+            animation:spin 1s linear infinite;
+            margin:0 auto 16px;
+        }
+        @@keyframes spin{to{transform:rotate(360deg)}}
+
+        #setupContent{display:none}
+        #setupContent.active{display:block}
+
+        .info-box{
+            background:rgba(40,224,163,.1);
+            border:1px solid rgba(40,224,163,.25);
+            border-radius:8px;
+            padding:16px;
+            margin-top:20px;
+        }
+        .info-box p{margin:0;font-size:14px;color:var(--muted)}
+    </style>
+</head>
+
+<body>
+    <div class="topbar">
+        <div class="brand">volet</div>
+    </div>
+
+    <div class="container">
+        <a href="/" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Back to Home
+        </a>
+
+        <h1 class="headline">Setup Authenticator</h1>
+        <p class="subtitle">Add an extra layer of security to your account with Google Authenticator</p>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="loading active">
+            <div class="spinner"></div>
+            <p style="color:var(--muted)">Setting up your authenticator...</p>
+        </div>
+
+        <!-- Setup Content -->
+        <div id="setupContent">
+            <div class="panel">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3 class="step-title">Download Google Authenticator</h3>
+                        <p class="step-text">
+                            Download and install Google Authenticator on your mobile device from the 
+                            <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Google Play Store</a> or 
+                            <a href="https://apps.apple.com/app/google-authenticator/id388497605" target="_blank">Apple App Store</a>.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3 class="step-title">Scan QR Code</h3>
+                        <p class="step-text">Open Google Authenticator and scan the QR code below:</p>
+                        <div class="qr-container">
+                            <img id="qrCode" src="" alt="QR Code" />
+                        </div>
+                        <p class="step-text">Or enter this key manually:</p>
+                        <div class="manual-key" id="manualKey"></div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3 class="step-title">Enter Verification Code</h3>
+                        <p class="step-text">Enter the 6-digit code from your authenticator app to confirm setup:</p>
+                        <div style="margin-top:16px">
+                            <input class="field otp-input" type="text" id="verifyCode" maxlength="6" placeholder="" pattern="[0-9]{6}" />
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:12px;margin-top:24px">
+                    <button class="btn btn-primary" id="confirmBtn" onclick="confirmAuthenticator()">
+                        Confirm & Enable
+                    </button>
+                    <button class="btn btn-secondary" onclick="window.location.href='/'">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <p>
+                    <strong>Important:</strong> After enabling authenticator, you'll need to enter a code from your app every time you log in. 
+                    Make sure to keep your phone secure and consider saving backup codes.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 4000,
+            timerProgressBar: true
+        });
+
+        // Check if user is authenticated
+        const token = localStorage.getItem('volet_token');
+        if (!token) {
+            window.location.href = '/login';
+        }
+
+        // Initialize setup
+        async function initSetup() {
+            try {
+                const res = await fetch('/api/Auth/setup-authenticator', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (res.status === 401) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Session Expired',
+                        text: 'Please login again.'
+                    });
+                    setTimeout(() => window.location.href = '/login', 2000);
+                    return;
+                }
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.message || 'Setup failed');
+                }
+
+                // Display QR code and manual key
+                document.getElementById('qrCode').src = data.qrCodeDataUri;
+                document.getElementById('manualKey').textContent = data.manualEntryKey;
+                
+                // Show content
+                document.getElementById('loadingState').classList.remove('active');
+                document.getElementById('setupContent').classList.add('active');
+
+            } catch (err) {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: err.message || 'Failed to initialize setup.'
+                });
+                document.getElementById('loadingState').innerHTML = `
+                    <p style="color:#ff5050">Failed to initialize setup. <a href="javascript:location.reload()">Try again</a></p>
+                `;
+            }
+        }
+
+        // Confirm authenticator
+        async function confirmAuthenticator() {
+            const code = document.getElementById('verifyCode').value.trim();
+            const btn = document.getElementById('confirmBtn');
+
+            if (code.length !== 6) {
+                Toast.fire({
+                    icon: 'warning',
+                    title: 'Invalid Code',
+                    text: 'Please enter a 6-digit code.'
+                });
+                return;
+            }
+
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/Auth/confirm-authenticator', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ code: code })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Verification Failed',
+                        text: data.message || 'Invalid code. Please try again.'
+                    });
+                    document.getElementById('verifyCode').value = '';
+                    document.getElementById('verifyCode').focus();
+                    return;
+                }
+
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Authenticator Enabled!',
+                    text: 'You will now need to enter a code from your authenticator app when logging in.',
+                    confirmButtonColor: '#28e0a3',
+                    confirmButtonText: 'Continue'
+                });
+
+                window.location.href = '/';
+
+            } catch (err) {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Confirmation failed. Please try again.'
+                });
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // Only allow numbers in code input
+        document.getElementById('verifyCode').addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 6);
+        });
+
+        // Enter key to submit
+        document.getElementById('verifyCode').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                confirmAuthenticator();
+            }
+        });
+
+        // Start setup
+        initSetup();
+    </script>
+</body>
+</html>

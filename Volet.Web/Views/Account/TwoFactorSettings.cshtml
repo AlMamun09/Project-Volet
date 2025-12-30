@@ -1,0 +1,608 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "Security Settings";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - Volet</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        :root{
+            --bg:#0b0f14;
+            --panel:#0f1720;
+            --line:rgba(255,255,255,.10);
+            --text:rgba(255,255,255,.92);
+            --muted:rgba(255,255,255,.62);
+            --muted2:rgba(255,255,255,.42);
+            --accent:#28e0a3;
+            --blue:#3b82f6;
+            --danger:#ef4444;
+        }
+
+        html,body{height:100%}
+        body{
+            margin:0;
+            font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+            background: radial-gradient(1200px 600px at 50% -20%, rgba(40,224,163,.10), transparent 55%), var(--bg);
+            color:var(--text);
+        }
+        a{color:var(--accent);text-decoration:none}
+        a:hover{text-decoration:underline}
+
+        .container{max-width:700px;margin:0 auto;padding:40px 20px}
+        .topbar{padding:28px 40px}
+        .brand{font-weight:800;letter-spacing:.4px;font-size:28px;color:#fff}
+
+        .headline{
+            font-size:32px;
+            font-weight:800;
+            margin:0 0 12px 0;
+            letter-spacing:-.02em;
+        }
+        .subtitle{color:var(--muted);margin:0 0 30px 0}
+
+        .panel{
+            background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+            border:1px solid var(--line);
+            border-radius:16px;
+            padding:28px;
+            box-shadow:0 20px 60px rgba(0,0,0,.35);
+            margin-bottom:20px;
+        }
+
+        .section-title{
+            font-size:18px;
+            font-weight:700;
+            margin:0 0 16px 0;
+        }
+
+        /* Toggle Switch */
+        .toggle-row{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            padding:16px 0;
+            border-bottom:1px solid var(--line);
+        }
+        .toggle-row:last-child{border-bottom:none}
+        .toggle-info h4{margin:0 0 4px 0;font-size:16px;font-weight:600}
+        .toggle-info p{margin:0;font-size:14px;color:var(--muted)}
+
+        .toggle-switch{
+            position:relative;
+            width:50px;
+            height:28px;
+            flex-shrink:0;
+        }
+        .toggle-switch input{
+            opacity:0;
+            width:0;
+            height:0;
+        }
+        .toggle-slider{
+            position:absolute;
+            cursor:pointer;
+            top:0;left:0;right:0;bottom:0;
+            background:rgba(255,255,255,.1);
+            border-radius:28px;
+            transition:0.3s;
+        }
+        .toggle-slider::before{
+            position:absolute;
+            content:"";
+            height:22px;
+            width:22px;
+            left:3px;
+            bottom:3px;
+            background:#fff;
+            border-radius:50%;
+            transition:0.3s;
+        }
+        .toggle-switch input:checked + .toggle-slider{
+            background:var(--accent);
+        }
+        .toggle-switch input:checked + .toggle-slider::before{
+            transform:translateX(22px);
+        }
+
+        .method-card{
+            background:rgba(255,255,255,.02);
+            border:2px solid var(--line);
+            border-radius:12px;
+            padding:20px;
+            margin-bottom:12px;
+            cursor:pointer;
+            transition:all 0.2s ease;
+            display:flex;
+            align-items:flex-start;
+            gap:16px;
+        }
+        .method-card:hover{border-color:rgba(255,255,255,.2)}
+        .method-card.selected{
+            border-color:var(--accent);
+            background:rgba(40,224,163,.05);
+        }
+        .method-card.disabled{
+            opacity:.5;
+            cursor:not-allowed;
+        }
+
+        .method-icon{
+            width:48px;
+            height:48px;
+            border-radius:12px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-shrink:0;
+        }
+        .method-icon.authenticator{background:rgba(251,191,36,.15)}
+        .method-icon.email{background:rgba(59,130,246,.15)}
+
+        .method-content{flex:1}
+        .method-title{font-weight:700;margin:0 0 4px 0;font-size:16px}
+        .method-desc{color:var(--muted);margin:0;font-size:14px;line-height:1.4}
+
+        .method-status{
+            padding:4px 10px;
+            border-radius:999px;
+            font-size:12px;
+            font-weight:600;
+            flex-shrink:0;
+        }
+        .method-status.active{background:rgba(40,224,163,.15);color:var(--accent)}
+        .method-status.setup{background:rgba(251,191,36,.15);color:#fbbf24}
+        .method-status.current{background:var(--accent);color:#000}
+
+        .radio-indicator{
+            width:20px;
+            height:20px;
+            border:2px solid var(--line);
+            border-radius:50%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-shrink:0;
+            margin-top:2px;
+        }
+        .method-card.selected .radio-indicator{border-color:var(--accent)}
+        .method-card.selected .radio-indicator::after{
+            content:'';
+            width:10px;
+            height:10px;
+            background:var(--accent);
+            border-radius:50%;
+        }
+
+        .btn{
+            border-radius:10px;
+            padding:12px 24px;
+            font-weight:700;
+            letter-spacing:.02em;
+            border:none;
+            cursor:pointer;
+            transition:all 0.2s ease;
+        }
+        .btn-primary{
+            background:var(--accent);
+            color:#000;
+        }
+        .btn-primary:hover{filter:brightness(1.1)}
+        .btn-primary:disabled{opacity:.65;cursor:not-allowed}
+        .btn-secondary{
+            background:rgba(255,255,255,.1);
+            color:var(--text);
+            border:1px solid var(--line);
+        }
+        .btn-secondary:hover{background:rgba(255,255,255,.15)}
+        .btn-sm{padding:8px 16px;font-size:13px}
+
+        .back-link{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            color:var(--muted);
+            font-size:14px;
+            margin-bottom:20px;
+        }
+        .back-link:hover{color:var(--text);text-decoration:none}
+
+        .loading{text-align:center;padding:60px}
+        .spinner{
+            width:40px;
+            height:40px;
+            border:3px solid var(--line);
+            border-top-color:var(--accent);
+            border-radius:50%;
+            animation:spin 1s linear infinite;
+            margin:0 auto 16px;
+        }
+        @@keyframes spin{to{transform:rotate(360deg)}}
+
+        .divider{
+            height:1px;
+            background:var(--line);
+            margin:24px 0;
+        }
+
+        .setup-prompt{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            background:rgba(251,191,36,.08);
+            border:1px solid rgba(251,191,36,.2);
+            border-radius:8px;
+            padding:14px 16px;
+            margin-top:12px;
+        }
+        .setup-prompt p{margin:0;font-size:14px;color:#fbbf24}
+
+        .method-section{display:none}
+        .method-section.active{display:block}
+    </style>
+</head>
+
+<body>
+    <div class="topbar">
+        <div class="brand">volet</div>
+    </div>
+
+    <div class="container">
+        <a href="/" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Back to Home
+        </a>
+
+        <h1 class="headline">Security Settings</h1>
+        <p class="subtitle">Configure two-factor authentication for your account</p>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="loading">
+            <div class="spinner"></div>
+            <p style="color:var(--muted)">Loading settings...</p>
+        </div>
+
+        <!-- Settings Content -->
+        <div id="settingsContent" style="display:none">
+            <!-- Enable/Disable 2FA Panel -->
+            <div class="panel">
+                <h3 class="section-title">Two-Factor Authentication</h3>
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <h4>Enable 2FA</h4>
+                        <p>Add an extra layer of security to your account by requiring a second verification step when logging in.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="enable2faToggle" onchange="toggle2FA()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 2FA Method Selection (shown only when 2FA is enabled) -->
+            <div class="panel method-section" id="methodSection">
+                <h3 class="section-title">Authentication Method</h3>
+                <p style="color:var(--muted);font-size:14px;margin:0 0 20px 0">
+                    Choose how you want to verify your identity when logging in
+                </p>
+
+                <!-- Email Method -->
+                <div class="method-card" id="emailCard" onclick="selectMethod('Email')">
+                    <div class="radio-indicator"></div>
+                    <div class="method-icon email">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                            <polyline points="22,6 12,13 2,6"/>
+                        </svg>
+                    </div>
+                    <div class="method-content">
+                        <h4 class="method-title">Email Magic Link</h4>
+                        <p class="method-desc">
+                            After entering your password, receive a secure login link via email to complete authentication.
+                        </p>
+                    </div>
+                    <span class="method-status" id="emailStatus"></span>
+                </div>
+
+                <!-- Authenticator Method -->
+                <div class="method-card" id="authenticatorCard" onclick="selectMethod('Authenticator')">
+                    <div class="radio-indicator"></div>
+                    <div class="method-icon authenticator">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                            <line x1="12" y1="18" x2="12.01" y2="18"/>
+                        </svg>
+                    </div>
+                    <div class="method-content">
+                        <h4 class="method-title">Google Authenticator</h4>
+                        <p class="method-desc">
+                            After entering your password, enter a 6-digit code from your authenticator app. More secure than email.
+                        </p>
+                    </div>
+                    <span class="method-status" id="authenticatorStatus"></span>
+                </div>
+
+                <!-- Setup prompt for authenticator -->
+                <div class="setup-prompt" id="setupPrompt" style="display:none">
+                    <p>You need to set up Google Authenticator first</p>
+                    <a href="/setup-authenticator" class="btn btn-secondary btn-sm">Set Up Now</a>
+                </div>
+
+                <div class="divider"></div>
+
+                <div style="display:flex;gap:12px">
+                    <button class="btn btn-primary" id="saveBtn" onclick="savePreference()" disabled>
+                        Save Method
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 4000,
+            timerProgressBar: true
+        });
+
+        let is2FAEnabled = false;
+        let currentMethod = '';
+        let selectedMethod = '';
+        let isAuthenticatorConfirmed = false;
+
+        // Check auth
+        const token = localStorage.getItem('volet_token');
+        if (!token) {
+            window.location.href = '/login';
+        }
+
+        // Load current status
+        async function loadStatus() {
+            try {
+                const res = await fetch('/api/Auth/2fa-status', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+
+                const data = await res.json();
+                
+                is2FAEnabled = data.isTwoFactorEnabled;
+                currentMethod = data.twoFactorMethod || 'Email';
+                selectedMethod = currentMethod;
+                isAuthenticatorConfirmed = data.isAuthenticatorConfirmed;
+
+                // Set toggle state
+                document.getElementById('enable2faToggle').checked = is2FAEnabled;
+                
+                updateUI();
+                
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('settingsContent').style.display = 'block';
+
+            } catch (err) {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to load settings.'
+                });
+            }
+        }
+
+        function updateUI() {
+            // Show/hide method section based on 2FA status
+            const methodSection = document.getElementById('methodSection');
+            if (is2FAEnabled) {
+                methodSection.classList.add('active');
+            } else {
+                methodSection.classList.remove('active');
+            }
+
+            // Update email card
+            const emailCard = document.getElementById('emailCard');
+            const emailStatus = document.getElementById('emailStatus');
+            
+            if (selectedMethod === 'Email') {
+                emailCard.classList.add('selected');
+                emailStatus.textContent = currentMethod === 'Email' ? 'Current' : 'Selected';
+                emailStatus.className = 'method-status ' + (currentMethod === 'Email' ? 'current' : 'active');
+            } else {
+                emailCard.classList.remove('selected');
+                emailStatus.textContent = 'Available';
+                emailStatus.className = 'method-status active';
+            }
+
+            // Update authenticator card
+            const authCard = document.getElementById('authenticatorCard');
+            const authStatus = document.getElementById('authenticatorStatus');
+            const setupPrompt = document.getElementById('setupPrompt');
+
+            if (isAuthenticatorConfirmed) {
+                if (selectedMethod === 'Authenticator') {
+                    authCard.classList.add('selected');
+                    authStatus.textContent = currentMethod === 'Authenticator' ? 'Current' : 'Selected';
+                    authStatus.className = 'method-status ' + (currentMethod === 'Authenticator' ? 'current' : 'active');
+                } else {
+                    authCard.classList.remove('selected');
+                    authStatus.textContent = 'Available';
+                    authStatus.className = 'method-status active';
+                }
+                setupPrompt.style.display = 'none';
+                authCard.classList.remove('disabled');
+            } else {
+                authCard.classList.remove('selected');
+                authStatus.textContent = 'Not Set Up';
+                authStatus.className = 'method-status setup';
+                setupPrompt.style.display = 'flex';
+                authCard.classList.add('disabled');
+            }
+
+            // Update save button
+            document.getElementById('saveBtn').disabled = (selectedMethod === currentMethod);
+        }
+
+        async function toggle2FA() {
+            const toggle = document.getElementById('enable2faToggle');
+            const newState = toggle.checked;
+
+            try {
+                if (newState) {
+                    // Enable 2FA with default method (Email)
+                    const res = await fetch('/api/Auth/set-2fa-preference', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ method: 'Email' })
+                    });
+
+                    if (!res.ok) {
+                        throw new Error('Failed to enable 2FA');
+                    }
+
+                    is2FAEnabled = true;
+                    currentMethod = 'Email';
+                    selectedMethod = 'Email';
+
+                    Toast.fire({
+                        icon: 'success',
+                        title: '2FA Enabled',
+                        text: 'Two-factor authentication is now enabled with Email method.'
+                    });
+                } else {
+                    // Disable 2FA - confirm first
+                    const result = await Swal.fire({
+                        title: 'Disable 2FA?',
+                        text: 'This will remove the extra security layer from your account.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: 'Yes, disable it'
+                    });
+
+                    if (result.isConfirmed) {
+                        const res = await fetch('/api/Auth/disable-2fa', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+
+                        if (!res.ok) {
+                            throw new Error('Failed to disable 2FA');
+                        }
+
+                        is2FAEnabled = false;
+
+                        Toast.fire({
+                            icon: 'success',
+                            title: '2FA Disabled',
+                            text: 'Two-factor authentication has been disabled.'
+                        });
+                    } else {
+                        // User cancelled - revert toggle
+                        toggle.checked = true;
+                        return;
+                    }
+                }
+
+                updateUI();
+
+            } catch (err) {
+                // Revert toggle on error
+                toggle.checked = !newState;
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: err.message || 'Failed to update 2FA settings.'
+                });
+            }
+        }
+
+        function selectMethod(method) {
+            if (method === 'Authenticator' && !isAuthenticatorConfirmed) {
+                Toast.fire({
+                    icon: 'info',
+                    title: 'Setup Required',
+                    text: 'Please set up Google Authenticator first.'
+                });
+                return;
+            }
+
+            selectedMethod = method;
+            
+            // Update visual selection
+            document.getElementById('emailCard').classList.toggle('selected', method === 'Email');
+            document.getElementById('authenticatorCard').classList.toggle('selected', method === 'Authenticator');
+            
+            // Enable save button if changed
+            document.getElementById('saveBtn').disabled = (selectedMethod === currentMethod);
+            updateUI();
+        }
+
+        async function savePreference() {
+            const btn = document.getElementById('saveBtn');
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/Auth/set-2fa-preference', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ method: selectedMethod })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.message || 'Failed to save preference');
+                }
+
+                currentMethod = selectedMethod;
+                updateUI();
+
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Settings Saved',
+                    text: `Authentication method set to ${selectedMethod === 'Email' ? 'Email Magic Link' : 'Google Authenticator'}.`
+                });
+
+            } catch (err) {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: err.message
+                });
+                btn.disabled = false;
+            }
+        }
+
+        // Initialize
+        loadStatus();
+    </script>
+</body>
+</html>

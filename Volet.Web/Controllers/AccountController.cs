@@ -14,5 +14,15 @@ namespace Volet.Web.Controllers
         [HttpGet]
         [HttpGet("/register")]
         public IActionResult Register() => View();
+
+        // /Account/SetupAuthenticator  AND  /setup-authenticator
+        [HttpGet]
+        [HttpGet("/setup-authenticator")]
+        public IActionResult SetupAuthenticator() => View();
+
+        // /Account/TwoFactorSettings  AND  /security-settings
+        [HttpGet]
+        [HttpGet("/security-settings")]
+        public IActionResult TwoFactorSettings() => View();
     }
 }

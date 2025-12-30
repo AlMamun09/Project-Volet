@@ -2,7 +2,113 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4">Welcome to Volet</h1>
+        <p class="lead text-muted">Your secure digital wallet</p>
+    </div>
+
+    <!-- User Actions Section (shown when logged in) -->
+    <div id="userSection" style="display:none">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body text-center">
+                        <h5 class="card-title mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            Security Settings
+                        </h5>
+                        <p class="card-text text-muted">
+                            Enable two-factor authentication to add an extra layer of security to your account.
+                        </p>
+                        <div id="2faStatus" class="mb-3">
+                            <!-- Status will be loaded dynamically -->
+                        </div>
+                        <a href="/security-settings" class="btn btn-primary">
+                            Manage 2FA Settings
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <button class="btn btn-outline-danger" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <!-- Guest Section (shown when not logged in) -->
+    <div id="guestSection" class="text-center">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <p>Please login or register to access your account.</p>
+                <a href="/login" class="btn btn-primary me-2">Login</a>
+                <a href="/register" class="btn btn-outline-secondary">Register</a>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+    const token = localStorage.getItem('volet_token');
+
+    if (token) {
+        // User is logged in
+        document.getElementById('userSection').style.display = 'block';
+        document.getElementById('guestSection').style.display = 'none';
+
+        // Load 2FA status
+        fetch('/api/Auth/2fa-status', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => {
+            if (res.status === 401) {
+                // Token expired
+                localStorage.removeItem('volet_token');
+                window.location.reload();
+                return;
+            }
+            return res.json();
+        })
+        .then(data => {
+            if (data) {
+                const statusDiv = document.getElementById('2faStatus');
+                if (data.isTwoFactorEnabled) {
+                    const method = data.twoFactorMethod === 'Authenticator' ? 'Google Authenticator' : 'Email Link';
+                    statusDiv.innerHTML = `
+                        <span class="badge bg-success">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            2FA Enabled (${method})
+                        </span>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <span class="badge bg-warning text-dark">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            2FA Not Enabled
+                        </span>
+                    `;
+                }
+            }
+        })
+        .catch(err => console.error('Failed to load 2FA status:', err));
+    } else {
+        // User is not logged in
+        document.getElementById('userSection').style.display = 'none';
+        document.getElementById('guestSection').style.display = 'block';
+    }
+
+    function logout() {
+        localStorage.removeItem('volet_token');
+        window.location.href = '/login';
+    }
+</script>

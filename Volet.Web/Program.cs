@@ -25,6 +25,9 @@ builder.Services.AddTransient<IEmailService, EmailService>();
 // Register View Render Service
 builder.Services.AddScoped<IViewRenderService, ViewRenderService>();
 
+// Register TOTP Service for 2FA
+builder.Services.AddSingleton<ITotpService, TotpService>();
+
 // Add Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
