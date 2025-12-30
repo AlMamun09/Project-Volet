@@ -430,3 +430,6 @@ FodyWeavers.xsd
 # Ignore appsettings files
 appsettings.json
 appsettings.*.json
+
+# But track the example appsettings
+!appsettings.example.json
