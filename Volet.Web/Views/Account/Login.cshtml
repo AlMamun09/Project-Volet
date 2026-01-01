@@ -424,9 +424,11 @@
 
             try {
                 userEmail = document.getElementById('email').value.trim();
+                const isRemember = document.getElementById('rememberMe').checked;
                 const payload = {
                     email: userEmail,
-                    password: document.getElementById('password').value
+                    password: document.getElementById('password').value,
+                    rememberMe: isRemember
                 };
 
                 const res = await fetch('/api/Auth/login-challenge', {
@@ -462,15 +464,7 @@
                         });
                     }
                 } else {
-                    // No 2FA - store token and redirect
-                    if (data.token) {
-                        const isRemember = document.getElementById('rememberMe').checked;
-                        if (isRemember) {
-                            localStorage.setItem('volet_token', data.token);
-                        } else {
-                            sessionStorage.setItem('volet_token', data.token);
-                        }
-                    }
+                    // No 2FA - redirect (Cookies set by server)
                     window.location.href = '/';
                 }
             } catch (err) {
@@ -507,7 +501,8 @@
                     body: JSON.stringify({
                         email: userEmail,
                         code: code,
-                        challengeToken: challengeToken
+                        challengeToken: challengeToken,
+                        rememberMe: rememberMe
                     })
                 });
 
@@ -524,13 +519,9 @@
                     return;
                 }
 
-                // Success - store token and redirect
-                if (data.token) {
-                    if (rememberMe) {
-                        localStorage.setItem('volet_token', data.token);
-                    } else {
-                        sessionStorage.setItem('volet_token', data.token);
-                    }
+                // Success - redirect (Cookies set by server)
+                if (data.token || res.ok) {
+                     window.location.href = '/';
                 }
 
                 Toast.fire({

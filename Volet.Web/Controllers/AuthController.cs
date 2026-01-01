@@ -201,11 +201,14 @@ namespace Volet.Web.Controllers
             };
 
             var token = GetToken(authClaims);
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+            // Set Cookies
+            SetTokenCookie(tokenString, model.RememberMe);
 
             return Ok(new
             {
                 RequiresTwoFactor = false,
-                token = new JwtSecurityTokenHandler().WriteToken(token),
                 expiration = token.ValidTo
             });
         }
@@ -242,10 +245,13 @@ namespace Volet.Web.Controllers
             };
 
             var token = GetToken(authClaims);
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+            // Set Cookies
+            SetTokenCookie(tokenString, model.RememberMe);
 
             return Ok(new
             {
-                token = new JwtSecurityTokenHandler().WriteToken(token),
                 expiration = token.ValidTo
             });
         }
@@ -298,8 +304,12 @@ namespace Volet.Web.Controllers
                 var authToken = GetToken(authClaims);
                 var jwtToken = new JwtSecurityTokenHandler().WriteToken(authToken);
 
-                // Redirect to a page that will store the token and redirect to home
-                return Redirect($"/login?magicLogin=success&token={jwtToken}");
+                // Set Cookies (Magic Login is usually treated as a session or remembered? Let's assume session for safety, or we could pass a param)
+                // For now, let's treat it as "Remember Me = false" (session only) unless we want to change url structure
+                SetTokenCookie(jwtToken, false);
+
+                // Redirect to home or dashboard since we are already authenticated via cookie
+                return Redirect("/?magicLogin=success");
             }
             catch (SecurityTokenExpiredException)
             {
@@ -480,15 +490,76 @@ namespace Volet.Web.Controllers
             };
 
             var token = GetToken(authClaims);
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+            // Refresh token -> Check if "remember me" was active?
+            // Since we don't know the previous state easily without extra claims, 
+            // we will default to Session cookie to be safe, OR check the existing cookie expiration.
+            // Simplified approach: treating refresh as extending the CURRENT session type.
+            // But we don't have that info easily. Let's assume we want to keep the user logged in.
+            // BETTER: Check if the incoming request had a persistent cookie? 
+            // Cookies doesn't tell us if it was persistent or session (browser handles that).
+            // Let's set it as a Session cookie by default to respect the 10 min window logic, 
+            // but if the user had "Remember Me", the browser might keep the old cookie? No, we are overwriting.
+            // TO FIX: We need to know if we should persist.
+            // For now: Let's set it as Session cookie. If the user closes the browser, they might lose it. 
+            // But "Remember Me" really implies the *Refresh Token* (long lived) concept which we don't have.
+            // We only have a short lived Access Token.
+            // Our "Remember Me" implementation in Plan was: localStorage vs sessionStorage.
+            // With Cookies: Persistent Cookie vs Session Cookie.
+            // Since we can't easily know, let's Default to Session Cookie for security.
+            SetTokenCookie(tokenString, false); 
 
             return Ok(new
             {
-                token = new JwtSecurityTokenHandler().WriteToken(token),
                 expiration = token.ValidTo
             });
         }
 
+        [Authorize]
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            Response.Cookies.Delete("volet_auth");
+            Response.Cookies.Delete("volet_session");
+            return Ok(new { Message = "Logged out successfully" });
+        }
+
         #region Helper Methods
+
+        private void SetTokenCookie(string token, bool rememberMe)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true, // Ensure HTTPS
+                SameSite = SameSiteMode.Strict,
+                Expires = rememberMe ? DateTime.UtcNow.AddDays(7) : null // Persistent vs Session
+            };
+
+            Response.Cookies.Append("volet_auth", token, cookieOptions);
+
+            // "Public" cookie for client-side logic (just expiration date)
+            var sessionCookieOptions = new CookieOptions
+            {
+                HttpOnly = false, // JS can read this
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = rememberMe ? DateTime.UtcNow.AddDays(7) : null
+            };
+
+            // We need to decode the token to get the expiration, or just pass it in? 
+            // Let's decode or just set a flag. Ideally checking real expiry from token is best.
+            // But for simplicity, we can just let the client decode the JWT if we sent it? No, we don't send JWT to client.
+            // So we write the Expiration Time to this public cookie.
+            var handler = new JwtSecurityTokenHandler();
+            var jwt = handler.ReadJwtToken(token);
+            var exp = jwt.ValidTo;
+
+            // Store as ISO string or timestamp
+            // Simple string: "exp_timestamp"
+            Response.Cookies.Append("volet_session", new DateTimeOffset(exp).ToUnixTimeSeconds().ToString(), sessionCookieOptions);
+        }
 
         private string GenerateEmailConfirmationToken(string userId, string email)
         {

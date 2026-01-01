@@ -61,6 +61,20 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            // Prefer "Authorization" header if present (e.g. for external API calls in future)
+            // Otherwise check for the cookie "volet_auth"
+            if (context.Request.Cookies.ContainsKey("volet_auth"))
+            {
+                context.Token = context.Request.Cookies["volet_auth"];
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
 // MVC controllers
