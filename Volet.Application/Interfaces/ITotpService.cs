@@ -1,34 +1,21 @@
 namespace Volet.Application.Interfaces
 {
-    /// <summary>
-    /// Service for TOTP (Time-based One-Time Password) operations
-    /// Compatible with Google Authenticator and similar apps
-    /// </summary>
+    // Service for TOTP (Time-based One-Time Password) operations
     public interface ITotpService
     {
-        /// <summary>
-        /// Generate a new Base32 encoded secret key for the user
-        /// </summary>
+        // Generate a new Base32 encoded secret key for the user
         string GenerateSecretKey();
-
-        /// <summary>
-        /// Generate the otpauth:// URI used by authenticator apps
-        /// </summary>
+        
+        // Generate the otpauth: URI used by authenticator apps
         string GenerateQrCodeUri(string email, string secretKey, string issuer = "Volet");
 
-        /// <summary>
-        /// Generate QR code as Base64 data URI for embedding in HTML
-        /// </summary>
+        // Generate QR code as Base64 data URI for embedding in HTML
         string GenerateQrCodeDataUri(string email, string secretKey, string issuer = "Volet");
-
-        /// <summary>
-        /// Validate a 6-digit TOTP code against the secret key
-        /// </summary>
+        
+        // Validate a 6-digit TOTP code against the secret key
         bool ValidateCode(string secretKey, string code);
 
-        /// <summary>
-        /// Format the secret key for manual entry (groups of 4 characters)
-        /// </summary>
+        // Format the secret key for manual entry (groups of 4 characters)
         string FormatKeyForManualEntry(string secretKey);
     }
 }

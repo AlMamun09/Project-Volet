@@ -217,7 +217,13 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <a class="muted-link" href="#" onclick="return false;">Forgot password?</a>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="rememberMe">
+                                            <label class="form-check-label" for="rememberMe" style="color:var(--muted)">Remember me</label>
+                                        </div>
+                                        <a class="muted-link" href="#" onclick="return false;">Forgot password?</a>
+                                    </div>
                                 </div>
 
                                 <button class="btn-auth btn-primary" id="loginBtn" type="submit">LOG IN</button>
@@ -315,8 +321,10 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // State
+        // State
         let challengeToken = '';
         let userEmail = '';
+        let rememberMe = false;
 
         // Toast configuration for SweetAlert2
         const Toast = Swal.mixin({
@@ -441,6 +449,7 @@
                 // Check if 2FA is required
                 if (data.requiresTwoFactor) {
                     challengeToken = data.challengeToken;
+                    rememberMe = document.getElementById('rememberMe').checked;
                     
                     if (data.twoFactorMethod === 'Authenticator') {
                         showTotpSection();
@@ -455,7 +464,12 @@
                 } else {
                     // No 2FA - store token and redirect
                     if (data.token) {
-                        localStorage.setItem('volet_token', data.token);
+                        const isRemember = document.getElementById('rememberMe').checked;
+                        if (isRemember) {
+                            localStorage.setItem('volet_token', data.token);
+                        } else {
+                            sessionStorage.setItem('volet_token', data.token);
+                        }
                     }
                     window.location.href = '/';
                 }
@@ -512,7 +526,11 @@
 
                 // Success - store token and redirect
                 if (data.token) {
-                    localStorage.setItem('volet_token', data.token);
+                    if (rememberMe) {
+                        localStorage.setItem('volet_token', data.token);
+                    } else {
+                        sessionStorage.setItem('volet_token', data.token);
+                    }
                 }
 
                 Toast.fire({

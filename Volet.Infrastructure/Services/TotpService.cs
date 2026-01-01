@@ -5,26 +5,20 @@ using Volet.Application.Interfaces;
 
 namespace Volet.Infrastructure.Services
 {
-    /// <summary>
-    /// Implementation of TOTP service using Otp.NET and QRCoder
-    /// </summary>
+    // Implementation of TOTP service using Otp.NET and QRCoder
     public class TotpService : ITotpService
     {
         private const int SecretKeyLength = 20; // 160 bits
         private const string Issuer = "Volet";
 
-        /// <summary>
-        /// Generate a new Base32 encoded secret key
-        /// </summary>
+        // Generate a new Base32 encoded secret key
         public string GenerateSecretKey()
         {
             var key = KeyGeneration.GenerateRandomKey(SecretKeyLength);
             return Base32Encoding.ToString(key);
         }
 
-        /// <summary>
-        /// Generate the otpauth:// URI for authenticator apps
-        /// </summary>
+        // Generate the otpauth: URI for authenticator apps
         public string GenerateQrCodeUri(string email, string secretKey, string issuer = Issuer)
         {
             // Format: otpauth://totp/{issuer}:{email}?secret={secret}&issuer={issuer}
@@ -33,9 +27,7 @@ namespace Volet.Infrastructure.Services
             return $"otpauth://totp/{encodedIssuer}:{encodedEmail}?secret={secretKey}&issuer={encodedIssuer}";
         }
 
-        /// <summary>
-        /// Generate QR code as Base64 data URI
-        /// </summary>
+        // Generate QR code as Base64 data URI
         public string GenerateQrCodeDataUri(string email, string secretKey, string issuer = Issuer)
         {
             var uri = GenerateQrCodeUri(email, secretKey, issuer);
@@ -50,9 +42,7 @@ namespace Volet.Infrastructure.Services
             return $"data:image/png;base64,{base64}";
         }
 
-        /// <summary>
-        /// Validate a 6-digit TOTP code
-        /// </summary>
+        // Validate a 6-digit TOTP code
         public bool ValidateCode(string secretKey, string code)
         {
             if (string.IsNullOrWhiteSpace(code) || code.Length != 6)
@@ -72,9 +62,7 @@ namespace Volet.Infrastructure.Services
             }
         }
 
-        /// <summary>
-        /// Format key for manual entry (groups of 4 characters with spaces)
-        /// </summary>
+        // Format key for manual entry (groups of 4 characters with spaces)
         public string FormatKeyForManualEntry(string secretKey)
         {
             var formatted = new StringBuilder();

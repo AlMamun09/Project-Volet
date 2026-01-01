@@ -196,7 +196,8 @@ namespace Volet.Web.Controllers
                 new Claim(ClaimTypes.Name, user.UserName!),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim("FirstName", user.FirstName),
-                new Claim("UserId", user.Id)
+                new Claim("UserId", user.Id),
+                new Claim(ClaimTypes.Email, user.Email!)
             };
 
             var token = GetToken(authClaims);
@@ -236,7 +237,8 @@ namespace Volet.Web.Controllers
                 new Claim(ClaimTypes.Name, user.UserName!),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim("FirstName", user.FirstName),
-                new Claim("UserId", user.Id)
+                new Claim("UserId", user.Id),
+                new Claim(ClaimTypes.Email, user.Email!)
             };
 
             var token = GetToken(authClaims);
@@ -289,7 +291,8 @@ namespace Volet.Web.Controllers
                     new Claim(ClaimTypes.Name, user.UserName!),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new Claim("FirstName", user.FirstName),
-                    new Claim("UserId", user.Id)
+                    new Claim("UserId", user.Id),
+                    new Claim(ClaimTypes.Email, user.Email!)
                 };
 
                 var authToken = GetToken(authClaims);
@@ -454,6 +457,37 @@ namespace Volet.Web.Controllers
             });
         }
 
+        // POST: api/Auth/refresh-token
+        [Authorize]
+        [HttpPost("refresh-token")]
+        public IActionResult RefreshToken()
+        {
+            var userId = User.FindFirst("UserId")?.Value;
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var userName = User.FindFirst(ClaimTypes.Name)?.Value;
+            var userFirstName = User.FindFirst("FirstName")?.Value;
+
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(userEmail))
+                return Unauthorized();
+
+            var authClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, userName ?? userEmail),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim("FirstName", userFirstName ?? ""),
+                new Claim("UserId", userId),
+                new Claim(ClaimTypes.Email, userEmail)
+            };
+
+            var token = GetToken(authClaims);
+
+            return Ok(new
+            {
+                token = new JwtSecurityTokenHandler().WriteToken(token),
+                expiration = token.ValidTo
+            });
+        }
+
         #region Helper Methods
 
         private string GenerateEmailConfirmationToken(string userId, string email)
@@ -568,7 +602,7 @@ namespace Volet.Web.Controllers
             return new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
-                expires: DateTime.Now.AddHours(3),
+                expires: DateTime.UtcNow.AddMinutes(10),
                 claims: authClaims,
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
             );
