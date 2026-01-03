@@ -28,6 +28,9 @@ builder.Services.AddScoped<IViewRenderService, ViewRenderService>();
 // Register TOTP Service for 2FA
 builder.Services.AddSingleton<ITotpService, TotpService>();
 
+// Register HttpClient and Currency Converter Service for CoinMarketCap API
+builder.Services.AddHttpClient<ICurrencyConverterService, CurrencyConverterService>();
+
 // Add Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {

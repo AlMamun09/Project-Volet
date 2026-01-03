@@ -279,30 +279,18 @@
             timerProgressBar: true
         });
 
-        // Check if user is authenticated
-        const token = localStorage.getItem('volet_token');
-        if (!token) {
-            window.location.href = '/login';
-        }
-
-        // Initialize setup
+        // Initialize setup (uses HttpOnly cookies for auth)
         async function initSetup() {
             try {
                 const res = await fetch('/api/Auth/setup-authenticator', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include'
                 });
 
                 if (res.status === 401) {
-                    Toast.fire({
-                        icon: 'error',
-                        title: 'Session Expired',
-                        text: 'Please login again.'
-                    });
-                    setTimeout(() => window.location.href = '/login', 2000);
+                    // Not authenticated - redirect to login
+                    window.location.href = '/login';
                     return;
                 }
 
@@ -351,10 +339,8 @@
             try {
                 const res = await fetch('/api/Auth/confirm-authenticator', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({ code: code })
                 });
 

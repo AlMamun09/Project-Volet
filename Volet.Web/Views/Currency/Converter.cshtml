@@ -1,0 +1,409 @@
+@{
+    ViewData["Title"] = "Currency Converter";
+}
+
+<style>
+    .converter-container {
+        background: linear-gradient(135deg, #1a1f2e 0%, #16192b 100%);
+        border-radius: 16px;
+        padding: 40px;
+        max-width: 700px;
+        margin: 40px auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+
+    .converter-title {
+        color: #fff;
+        font-size: 28px;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .amount-input {
+        width: 100%;
+        padding: 16px 20px;
+        font-size: 18px;
+        background: #2a3042;
+        border: 2px solid #3d4258;
+        border-radius: 10px;
+        color: #fff;
+        margin-bottom: 20px;
+        transition: border-color 0.3s ease;
+    }
+
+    .amount-input:focus {
+        outline: none;
+        border-color: #5b9cf6;
+    }
+
+    .currency-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 25px;
+    }
+
+    .currency-select {
+        flex: 1;
+        padding: 14px 16px;
+        font-size: 15px;
+        background: #2a3042;
+        border: 2px solid #3d4258;
+        border-radius: 10px;
+        color: #fff;
+        cursor: pointer;
+        transition: border-color 0.3s ease;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23fff' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        padding-right: 40px;
+    }
+
+    .currency-select:focus {
+        outline: none;
+        border-color: #5b9cf6;
+    }
+
+    .currency-select option {
+        background: #2a3042;
+        color: #fff;
+        padding: 10px;
+    }
+
+    .swap-btn {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #5b9cf6 0%, #4a8ae5 100%);
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        flex-shrink: 0;
+    }
+
+    .swap-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(91, 156, 246, 0.4);
+    }
+
+    .swap-btn svg {
+        width: 20px;
+        height: 20px;
+        fill: #fff;
+    }
+
+    .result-section {
+        text-align: center;
+        padding: 25px;
+        background: #2a3042;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        min-height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .result-text {
+        color: #b0b8c9;
+        font-size: 16px;
+    }
+
+    .result-text .amount {
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .result-text .converted-amount {
+        color: #5b9cf6;
+        font-weight: 700;
+        font-size: 20px;
+    }
+
+    .convert-btn {
+        display: block;
+        width: 200px;
+        margin: 0 auto;
+        padding: 14px 32px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+        background: linear-gradient(135deg, #2a3042 0%, #1f2433 100%);
+        border: 2px solid #3d4258;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .convert-btn:hover {
+        background: linear-gradient(135deg, #3d4258 0%, #2a3042 100%);
+        border-color: #5b9cf6;
+    }
+
+    .convert-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .convert-btn.loading {
+        position: relative;
+        color: transparent;
+    }
+
+    .convert-btn.loading::after {
+        content: "";
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin-left: -10px;
+        margin-top: -10px;
+        border: 3px solid #5b9cf6;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .error-message {
+        color: #ff6b6b;
+        text-align: center;
+        padding: 15px;
+        background: rgba(255, 107, 107, 0.1);
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: none;
+    }
+
+    .currency-group {
+        color: #5b9cf6;
+        font-weight: 600;
+        padding: 8px 16px;
+        background: #1a1f2e;
+    }
+
+    /* Section Headers in Select */
+    .currency-select optgroup {
+        background: #1a1f2e;
+        color: #5b9cf6;
+        font-weight: 600;
+    }
+</style>
+
+<div class="converter-container">
+    <h1 class="converter-title">Cryptocurrency Converter Calculator</h1>
+
+    <input type="number" 
+           id="amount" 
+           class="amount-input" 
+           value="1" 
+           min="0" 
+           step="any"
+           placeholder="Enter amount">
+
+    <div class="currency-row">
+        <select id="fromCurrency" class="currency-select">
+            <optgroup label="Fiat Currencies">
+                <option value="BDT" selected>Bangladeshi Taka "৳" (BDT)</option>
+                <option value="USD">United States Dollar "$" (USD)</option>
+                <option value="EUR">Euro "€" (EUR)</option>
+                <option value="GBP">British Pound "£" (GBP)</option>
+                <option value="JPY">Japanese Yen "¥" (JPY)</option>
+                <option value="INR">Indian Rupee "₹" (INR)</option>
+                <option value="CAD">Canadian Dollar "C$" (CAD)</option>
+                <option value="AUD">Australian Dollar "A$" (AUD)</option>
+                <option value="CHF">Swiss Franc "CHF" (CHF)</option>
+                <option value="CNY">Chinese Yuan "¥" (CNY)</option>
+                <option value="SGD">Singapore Dollar "S$" (SGD)</option>
+                <option value="MYR">Malaysian Ringgit "RM" (MYR)</option>
+                <option value="AED">UAE Dirham "د.إ" (AED)</option>
+                <option value="SAR">Saudi Riyal "﷼" (SAR)</option>
+            </optgroup>
+            <optgroup label="Cryptocurrencies">
+                <option value="BTC">Bitcoin "₿" (BTC)</option>
+                <option value="ETH">Ethereum "Ξ" (ETH)</option>
+                <option value="USDT">Tether "₮" (USDT)</option>
+                <option value="BNB">BNB "BNB" (BNB)</option>
+                <option value="XRP">XRP "XRP" (XRP)</option>
+                <option value="ADA">Cardano "₳" (ADA)</option>
+                <option value="DOGE">Dogecoin "Ð" (DOGE)</option>
+                <option value="SOL">Solana "SOL" (SOL)</option>
+                <option value="DOT">Polkadot "DOT" (DOT)</option>
+                <option value="MATIC">Polygon "MATIC" (MATIC)</option>
+                <option value="LTC">Litecoin "Ł" (LTC)</option>
+                <option value="SHIB">Shiba Inu "SHIB" (SHIB)</option>
+                <option value="TRX">TRON "TRX" (TRX)</option>
+                <option value="AVAX">Avalanche "AVAX" (AVAX)</option>
+                <option value="LINK">Chainlink "LINK" (LINK)</option>
+            </optgroup>
+        </select>
+
+        <button id="swapBtn" class="swap-btn" title="Swap currencies">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-9L21 12m0 0l-4.5 4.5M21 12H7.5" 
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+        </button>
+
+        <select id="toCurrency" class="currency-select">
+            <optgroup label="Fiat Currencies">
+                <option value="BDT">Bangladeshi Taka "৳" (BDT)</option>
+                <option value="USD" selected>United States Dollar "$" (USD)</option>
+                <option value="EUR">Euro "€" (EUR)</option>
+                <option value="GBP">British Pound "£" (GBP)</option>
+                <option value="JPY">Japanese Yen "¥" (JPY)</option>
+                <option value="INR">Indian Rupee "₹" (INR)</option>
+                <option value="CAD">Canadian Dollar "C$" (CAD)</option>
+                <option value="AUD">Australian Dollar "A$" (AUD)</option>
+                <option value="CHF">Swiss Franc "CHF" (CHF)</option>
+                <option value="CNY">Chinese Yuan "¥" (CNY)</option>
+                <option value="SGD">Singapore Dollar "S$" (SGD)</option>
+                <option value="MYR">Malaysian Ringgit "RM" (MYR)</option>
+                <option value="AED">UAE Dirham "د.إ" (AED)</option>
+                <option value="SAR">Saudi Riyal "﷼" (SAR)</option>
+            </optgroup>
+            <optgroup label="Cryptocurrencies">
+                <option value="BTC">Bitcoin "₿" (BTC)</option>
+                <option value="ETH">Ethereum "Ξ" (ETH)</option>
+                <option value="USDT">Tether "₮" (USDT)</option>
+                <option value="BNB">BNB "BNB" (BNB)</option>
+                <option value="XRP">XRP "XRP" (XRP)</option>
+                <option value="ADA">Cardano "₳" (ADA)</option>
+                <option value="DOGE">Dogecoin "Ð" (DOGE)</option>
+                <option value="SOL">Solana "SOL" (SOL)</option>
+                <option value="DOT">Polkadot "DOT" (DOT)</option>
+                <option value="MATIC">Polygon "MATIC" (MATIC)</option>
+                <option value="LTC">Litecoin "Ł" (LTC)</option>
+                <option value="SHIB">Shiba Inu "SHIB" (SHIB)</option>
+                <option value="TRX">TRON "TRX" (TRX)</option>
+                <option value="AVAX">Avalanche "AVAX" (AVAX)</option>
+                <option value="LINK">Chainlink "LINK" (LINK)</option>
+            </optgroup>
+        </select>
+    </div>
+
+    <div id="errorMessage" class="error-message"></div>
+
+    <div class="result-section">
+        <p id="resultText" class="result-text">
+            Click "Convert" to see the exchange rate
+        </p>
+    </div>
+
+    <button id="convertBtn" class="convert-btn">Convert</button>
+</div>
+
+<script>
+    const amountInput = document.getElementById('amount');
+    const fromCurrency = document.getElementById('fromCurrency');
+    const toCurrency = document.getElementById('toCurrency');
+    const swapBtn = document.getElementById('swapBtn');
+    const convertBtn = document.getElementById('convertBtn');
+    const resultText = document.getElementById('resultText');
+    const errorMessage = document.getElementById('errorMessage');
+
+    // Swap currencies
+    swapBtn.addEventListener('click', () => {
+        const temp = fromCurrency.value;
+        fromCurrency.value = toCurrency.value;
+        toCurrency.value = temp;
+        
+        // Add rotation animation
+        swapBtn.style.transform = 'rotate(180deg)';
+        setTimeout(() => {
+            swapBtn.style.transform = 'rotate(0deg)';
+        }, 300);
+    });
+
+    // Convert currency
+    convertBtn.addEventListener('click', async () => {
+        const amount = parseFloat(amountInput.value);
+        
+        if (isNaN(amount) || amount <= 0) {
+            showError('Please enter a valid amount greater than 0');
+            return;
+        }
+
+        if (fromCurrency.value === toCurrency.value) {
+            showError('Please select different currencies');
+            return;
+        }
+
+        hideError();
+        convertBtn.classList.add('loading');
+        convertBtn.disabled = true;
+
+        try {
+            const response = await fetch('/api/Currency/convert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    amount: amount,
+                    fromCurrency: fromCurrency.value,
+                    toCurrency: toCurrency.value
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Conversion failed');
+            }
+
+            // Format the result
+            const fromName = fromCurrency.options[fromCurrency.selectedIndex].text;
+            const toName = toCurrency.options[toCurrency.selectedIndex].text;
+            
+            resultText.innerHTML = `
+                <span class="amount">${formatNumber(data.originalAmount)}</span> ${fromName}
+                <span style="margin: 0 12px; color: #5b9cf6;">=</span>
+                <span class="converted-amount">${formatNumber(data.convertedAmount)}</span> ${toName}
+            `;
+        } catch (error) {
+            showError(error.message || 'Failed to convert currency. Please try again.');
+        } finally {
+            convertBtn.classList.remove('loading');
+            convertBtn.disabled = false;
+        }
+    });
+
+    // Format number with appropriate decimal places
+    function formatNumber(num) {
+        if (num >= 1) {
+            return num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        } else if (num >= 0.0001) {
+            return num.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 6 });
+        } else {
+            return num.toExponential(4);
+        }
+    }
+
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = 'block';
+    }
+
+    function hideError() {
+        errorMessage.style.display = 'none';
+    }
+
+    // Allow Enter key to trigger conversion
+    amountInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            convertBtn.click();
+        }
+    });
+</script>

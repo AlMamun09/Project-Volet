@@ -366,22 +366,21 @@
         let selectedMethod = '';
         let isAuthenticatorConfirmed = false;
 
-        // Check auth
-        const token = localStorage.getItem('volet_token');
-        if (!token) {
-            window.location.href = '/login';
-        }
-
-        // Load current status
+        // Load current status (uses HttpOnly cookies for auth)
         async function loadStatus() {
             try {
                 const res = await fetch('/api/Auth/2fa-status', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    credentials: 'include' // Include cookies for authentication
                 });
 
                 if (res.status === 401) {
+                    // Not authenticated - redirect to login
                     window.location.href = '/login';
                     return;
+                }
+
+                if (!res.ok) {
+                    throw new Error('Failed to load settings');
                 }
 
                 const data = await res.json();
@@ -407,6 +406,7 @@
                 });
             }
         }
+
 
         function updateUI() {
             // Show/hide method section based on 2FA status
@@ -469,10 +469,8 @@
                     // Enable 2FA with default method (Email)
                     const res = await fetch('/api/Auth/set-2fa-preference', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
                         body: JSON.stringify({ method: 'Email' })
                     });
 
@@ -504,10 +502,8 @@
                     if (result.isConfirmed) {
                         const res = await fetch('/api/Auth/disable-2fa', {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${token}`
-                            }
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include'
                         });
 
                         if (!res.ok) {
@@ -569,10 +565,8 @@
             try {
                 const res = await fetch('/api/Auth/set-2fa-preference', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({ method: selectedMethod })
                 });
 

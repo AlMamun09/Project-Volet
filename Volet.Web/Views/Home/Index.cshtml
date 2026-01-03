@@ -53,28 +53,20 @@
 </div>
 
 <script>
-    const token = localStorage.getItem('volet_token');
+    // Check authentication status via API (since we use HttpOnly cookies)
+    async function checkAuthStatus() {
+        try {
+            const res = await fetch('/api/Auth/2fa-status', {
+                credentials: 'include' // Important: include cookies
+            });
 
-    if (token) {
-        // User is logged in
-        document.getElementById('userSection').style.display = 'block';
-        document.getElementById('guestSection').style.display = 'none';
+            if (res.ok) {
+                // User is authenticated
+                const data = await res.json();
+                document.getElementById('userSection').style.display = 'block';
+                document.getElementById('guestSection').style.display = 'none';
 
-        // Load 2FA status
-        fetch('/api/Auth/2fa-status', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        })
-        .then(res => {
-            if (res.status === 401) {
-                // Token expired
-                localStorage.removeItem('volet_token');
-                window.location.reload();
-                return;
-            }
-            return res.json();
-        })
-        .then(data => {
-            if (data) {
+                // Update 2FA status
                 const statusDiv = document.getElementById('2faStatus');
                 if (data.isTwoFactorEnabled) {
                     const method = data.twoFactorMethod === 'Authenticator' ? 'Google Authenticator' : 'Email Link';
@@ -98,17 +90,32 @@
                         </span>
                     `;
                 }
+            } else {
+                // User is not authenticated
+                document.getElementById('userSection').style.display = 'none';
+                document.getElementById('guestSection').style.display = 'block';
             }
-        })
-        .catch(err => console.error('Failed to load 2FA status:', err));
-    } else {
-        // User is not logged in
-        document.getElementById('userSection').style.display = 'none';
-        document.getElementById('guestSection').style.display = 'block';
+        } catch (err) {
+            // Network error - show guest section
+            console.error('Failed to check auth status:', err);
+            document.getElementById('userSection').style.display = 'none';
+            document.getElementById('guestSection').style.display = 'block';
+        }
     }
 
-    function logout() {
-        localStorage.removeItem('volet_token');
+    // Logout function
+    async function logout() {
+        try {
+            await fetch('/api/Auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+        } catch (err) {
+            console.error('Logout error:', err);
+        }
         window.location.href = '/login';
     }
+
+    // Check auth status on page load
+    checkAuthStatus();
 </script>

@@ -377,19 +377,6 @@
                 });
                 window.history.replaceState({}, document.title, '/login');
             }
-
-            // Magic login success
-            if (qp.get('magicLogin') === 'success' && qp.get('token')) {
-                localStorage.setItem('volet_token', qp.get('token'));
-                Toast.fire({
-                    icon: 'success',
-                    title: 'Login successful!',
-                    text: 'Redirecting...'
-                });
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 1000);
-            }
         })();
 
         function showLoginSection() {
