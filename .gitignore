@@ -433,3 +433,6 @@ appsettings.*.json
 
 # But track the example appsettings
 !appsettings.example.json
+
+# Ignore uploads folder
+Volet.Web/wwwroot/uploads/

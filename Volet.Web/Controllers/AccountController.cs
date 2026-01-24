@@ -2,7 +2,11 @@
 
 namespace Volet.Web.Controllers
 {
+    /// <summary>
+    /// MVC Controller for serving account-related views (not API endpoints)
+    /// </summary>
     [Route("[controller]/[action]")]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class AccountController : Controller
     {
         // /Account/Login  AND  /login

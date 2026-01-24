@@ -12,8 +12,12 @@ using Volet.Domain.Entities;
 
 namespace Volet.Web.Controllers
 {
+    /// <summary>
+    /// Authentication controller for user registration, login, and two-factor authentication
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class AuthController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -36,8 +40,18 @@ namespace Volet.Web.Controllers
             _totpService = totpService;
         }
 
-        // POST: api/Auth/register
+        /// <summary>
+        /// Register a new user account
+        /// </summary>
+        /// <param name="model">Registration details including email, password, and consent flags</param>
+        /// <returns>Success message with email confirmation instructions</returns>
+        /// <response code="200">User created successfully, confirmation email sent</response>
+        /// <response code="400">Validation error - missing required consents</response>
+        /// <response code="500">User already exists or creation failed</response>
         [HttpPost("register")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Register([FromBody] RegisterDto model)
         {
             // Check if user already exists
@@ -88,8 +102,13 @@ namespace Volet.Web.Controllers
             return Ok(new { Status = "Success", Message = "User created successfully! Please check your email to confirm your account." });
         }
 
-        // GET: api/Auth/confirm-email
+        /// <summary>
+        /// Confirm email address using the token from confirmation email
+        /// </summary>
+        /// <param name="token">JWT token from confirmation email link</param>
+        /// <returns>Redirects to login page with status</returns>
         [HttpGet("confirm-email")]
+        [ProducesResponseType(StatusCodes.Status302Found)]
         public async Task<IActionResult> ConfirmEmail(string token)
         {
             try
@@ -147,9 +166,55 @@ namespace Volet.Web.Controllers
             }
         }
 
-        // POST: api/Auth/login-challenge
-        // First step of login - validates credentials and returns 2FA method
+        /// <summary>
+        /// Resend the confirmation email to the user
+        /// </summary>
+        /// <param name="email">User's email address</param>
+        /// <returns>Success message</returns>
+        [HttpPost("resend-confirmation-email")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> ResendConfirmationEmail([FromBody] string email)
+        {
+            if (string.IsNullOrEmpty(email))
+                return BadRequest(new { Status = "Error", Message = "Email is required." });
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return NotFound(new { Status = "Error", Message = "User not found." });
+
+            if (user.EmailConfirmed)
+                return BadRequest(new { Status = "Error", Message = "Email is already confirmed." });
+
+            // Generate JWT Token for Email Confirmation
+            var confirmationToken = GenerateEmailConfirmationToken(user.Id, user.Email!);
+
+            // Build the Confirmation Link
+            var confirmationLink = Url.Action(nameof(ConfirmEmail), "Auth", new { token = confirmationToken }, Request.Scheme);
+
+            // Render email template
+            var emailBody = await _viewRenderService.RenderToStringAsync("Emails/EmailConfirmation", confirmationLink);
+
+            await _emailService.SendEmailAsync(user.Email!, "Confirm your email", emailBody);
+
+            return Ok(new { Status = "Success", Message = "Confirmation email sent successfully." });
+        }
+
+        /// <summary>
+        /// Initiate login with credentials (step 1 of authentication)
+        /// </summary>
+        /// <remarks>
+        /// If 2FA is enabled, returns challenge token and 2FA method.
+        /// If 2FA is disabled, issues JWT token directly via cookie.
+        /// </remarks>
+        /// <param name="model">Login credentials (email, password, rememberMe)</param>
+        /// <returns>Authentication result with optional 2FA challenge</returns>
+        /// <response code="200">Login successful or 2FA challenge returned</response>
+        /// <response code="401">Invalid credentials or unconfirmed email</response>
         [HttpPost("login-challenge")]
+        [ProducesResponseType(typeof(LoginChallengeResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> LoginChallenge([FromBody] LoginChallengeDto model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
@@ -213,9 +278,18 @@ namespace Volet.Web.Controllers
             });
         }
 
-        // POST: api/Auth/verify-totp
-        // Verify TOTP code from Google Authenticator
+        /// <summary>
+        /// Verify TOTP code from authenticator app (step 2 of 2FA login)
+        /// </summary>
+        /// <param name="model">Challenge token and 6-digit TOTP code</param>
+        /// <returns>JWT token expiration on success</returns>
+        /// <response code="200">Authentication successful, JWT cookie set</response>
+        /// <response code="400">Authenticator not set up</response>
+        /// <response code="401">Invalid challenge token or TOTP code</response>
         [HttpPost("verify-totp")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> VerifyTotp([FromBody] VerifyTotpDto model)
         {
             // Validate challenge token
@@ -256,9 +330,13 @@ namespace Volet.Web.Controllers
             });
         }
 
-        // GET: api/Auth/verify-email-login
-        // Verify magic login link from email
+        /// <summary>
+        /// Complete login via magic email link (step 2 of email-based 2FA)
+        /// </summary>
+        /// <param name="token">Magic login JWT token from email</param>
+        /// <returns>Redirects to home on success, login page on error</returns>
         [HttpGet("verify-email-login")]
+        [ProducesResponseType(StatusCodes.Status302Found)]
         public async Task<IActionResult> VerifyEmailLogin(string token)
         {
             try
@@ -321,10 +399,19 @@ namespace Volet.Web.Controllers
             }
         }
 
-        // POST: api/Auth/setup-authenticator
-        // Generate QR code for Google Authenticator setup
+        /// <summary>
+        /// Generate QR code for authenticator app setup
+        /// </summary>
+        /// <remarks>Requires authentication. Returns QR code data URI and manual entry key.</remarks>
+        /// <returns>Authenticator setup data including QR code</returns>
+        /// <response code="200">Setup data returned successfully</response>
+        /// <response code="401">User not authenticated</response>
+        /// <response code="404">User not found</response>
         [Authorize]
         [HttpPost("setup-authenticator")]
+        [ProducesResponseType(typeof(AuthenticatorSetupDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> SetupAuthenticator()
         {
             var userId = User.FindFirst("UserId")?.Value;
@@ -355,10 +442,20 @@ namespace Volet.Web.Controllers
             });
         }
 
-        // POST: api/Auth/confirm-authenticator
-        // Confirm authenticator setup by verifying first code
+        /// <summary>
+        /// Confirm authenticator setup by verifying the first TOTP code
+        /// </summary>
+        /// <remarks>Requires authentication. Enables 2FA with Authenticator method upon success.</remarks>
+        /// <param name="model">6-digit verification code from authenticator app</param>
+        /// <returns>Success message on confirmation</returns>
+        /// <response code="200">Authenticator confirmed and 2FA enabled</response>
+        /// <response code="400">Invalid code or authenticator not set up</response>
+        /// <response code="401">User not authenticated</response>
         [Authorize]
         [HttpPost("confirm-authenticator")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> ConfirmAuthenticator([FromBody] ConfirmAuthenticatorDto model)
         {
             var userId = User.FindFirst("UserId")?.Value;
@@ -385,10 +482,20 @@ namespace Volet.Web.Controllers
             return Ok(new { Status = "Success", Message = "Authenticator confirmed successfully!" });
         }
 
-        // POST: api/Auth/set-2fa-preference
-        // Set user's preferred 2FA method
+        /// <summary>
+        /// Set preferred two-factor authentication method
+        /// </summary>
+        /// <remarks>Requires authentication. Valid methods: 'Authenticator' or 'Email'.</remarks>
+        /// <param name="model">Preferred 2FA method</param>
+        /// <returns>Success message on update</returns>
+        /// <response code="200">2FA preference updated</response>
+        /// <response code="400">Invalid method or authenticator not confirmed</response>
+        /// <response code="401">User not authenticated</response>
         [Authorize]
         [HttpPost("set-2fa-preference")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Set2FAPreference([FromBody] Set2FAPreferenceDto model)
         {
             var userId = User.FindFirst("UserId")?.Value;
@@ -412,10 +519,19 @@ namespace Volet.Web.Controllers
             return Ok(new { Status = "Success", Message = $"2FA method set to {model.Method}." });
         }
 
-        // GET: api/Auth/2fa-status
-        // Get current 2FA status
+        /// <summary>
+        /// Get current two-factor authentication status
+        /// </summary>
+        /// <remarks>Requires authentication.</remarks>
+        /// <returns>2FA status including method and confirmation state</returns>
+        /// <response code="200">2FA status returned</response>
+        /// <response code="401">User not authenticated</response>
+        /// <response code="404">User not found</response>
         [Authorize]
         [HttpGet("2fa-status")]
+        [ProducesResponseType(typeof(TwoFactorStatusDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Get2FAStatus()
         {
             var userId = User.FindFirst("UserId")?.Value;
@@ -434,10 +550,19 @@ namespace Volet.Web.Controllers
             });
         }
 
-        // POST: api/Auth/disable-2fa
-        // Disable 2FA for the user
+        /// <summary>
+        /// Disable two-factor authentication
+        /// </summary>
+        /// <remarks>Requires authentication. Disables all 2FA methods for the user.</remarks>
+        /// <returns>Success message on disable</returns>
+        /// <response code="200">2FA disabled successfully</response>
+        /// <response code="401">User not authenticated</response>
+        /// <response code="404">User not found</response>
         [Authorize]
         [HttpPost("disable-2fa")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Disable2FA()
         {
             var userId = User.FindFirst("UserId")?.Value;
@@ -455,8 +580,15 @@ namespace Volet.Web.Controllers
             return Ok(new { Status = "Success", Message = "Two-factor authentication has been disabled." });
         }
 
-        // POST: api/Auth/login (keep for backward compatibility, but redirects to login-challenge)
+        /// <summary>
+        /// Login with email and password (legacy endpoint)
+        /// </summary>
+        /// <remarks>Redirects to login-challenge internally. Use login-challenge for new integrations.</remarks>
+        /// <param name="model">Login credentials</param>
+        /// <returns>Authentication result</returns>
         [HttpPost("login")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login([FromBody] LoginDto model)
         {
             // Redirect to login-challenge for consistency
@@ -467,9 +599,17 @@ namespace Volet.Web.Controllers
             });
         }
 
-        // POST: api/Auth/refresh-token
+        /// <summary>
+        /// Refresh the JWT authentication token
+        /// </summary>
+        /// <remarks>Requires authentication. Issues a new JWT token before the current one expires.</remarks>
+        /// <returns>New token expiration time</returns>
+        /// <response code="200">Token refreshed successfully</response>
+        /// <response code="401">User not authenticated</response>
         [Authorize]
         [HttpPost("refresh-token")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult RefreshToken()
         {
             var userId = User.FindFirst("UserId")?.Value;
@@ -516,8 +656,17 @@ namespace Volet.Web.Controllers
             });
         }
 
+        /// <summary>
+        /// Logout and clear authentication cookies
+        /// </summary>
+        /// <remarks>Requires authentication. Removes JWT token cookies from browser.</remarks>
+        /// <returns>Success message</returns>
+        /// <response code="200">Logged out successfully</response>
+        /// <response code="401">User not authenticated</response>
         [Authorize]
         [HttpPost("logout")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult Logout()
         {
             Response.Cookies.Delete("volet_auth");

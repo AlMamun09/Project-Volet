@@ -4,8 +4,12 @@ using Volet.Application.Interfaces;
 
 namespace Volet.Web.Controllers
 {
+    /// <summary>
+    /// Currency conversion controller supporting fiat and cryptocurrency conversions
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class CurrencyController : Controller
     {
         private readonly ICurrencyConverterService _currencyConverterService;
@@ -19,15 +23,33 @@ namespace Volet.Web.Controllers
             _logger = logger;
         }
 
-        // Serves the currency converter page
+        /// <summary>
+        /// Serves the currency converter web page
+        /// </summary>
+        /// <returns>Currency converter view</returns>
         [HttpGet("/converter")]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public IActionResult Converter()
         {
             return View();
         }
 
-        // Convert currency using CoinMarketCap API
+        /// <summary>
+        /// Convert amount between fiat and/or cryptocurrency
+        /// </summary>
+        /// <remarks>
+        /// Uses CoinMarketCap API for real-time conversion rates.
+        /// Supports both fiat currencies (USD, EUR, BDT, etc.) and cryptocurrencies (BTC, ETH, etc.).
+        /// </remarks>
+        /// <param name="request">Conversion request with amount, source and target currencies</param>
+        /// <returns>Conversion result with exchange rate and converted amount</returns>
+        /// <response code="200">Conversion successful</response>
+        /// <response code="400">Invalid request (amount <= 0 or missing currencies)</response>
+        /// <response code="500">Conversion service unavailable</response>
         [HttpPost("convert")]
+        [ProducesResponseType(typeof(CurrencyConvertResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Convert([FromBody] CurrencyConvertRequestDto request)
         {
             if (request.Amount <= 0)
@@ -53,8 +75,14 @@ namespace Volet.Web.Controllers
             return Ok(result);
         }
 
-        // Get list of supported currencies
+        /// <summary>
+        /// Get list of all supported currencies
+        /// </summary>
+        /// <remarks>Returns both fiat currencies and cryptocurrencies with their symbols and names.</remarks>
+        /// <returns>Array of supported currencies with symbol, name, and type</returns>
+        /// <response code="200">List of currencies returned</response>
         [HttpGet("currencies")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public IActionResult GetCurrencies()
         {
             var currencies = new[]

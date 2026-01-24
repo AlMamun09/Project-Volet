@@ -91,13 +91,29 @@ builder.Services.AddSwaggerGen(options =>
     {
         Version = "v1",
         Title = "Volet API",
-        Description = "An ASP.NET Core Web API for Volet application",
+        Description = "The Volet API documentation - A digital wallet and authentication platform",
         Contact = new OpenApiContact
         {
             Name = "Volet Team",
             Url = new Uri("https://github.com/AlMamun09/Project-Volet")
         }
     });
+
+    // Include XML comments from Web project
+    var webXmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var webXmlPath = Path.Combine(AppContext.BaseDirectory, webXmlFile);
+    if (File.Exists(webXmlPath))
+    {
+        options.IncludeXmlComments(webXmlPath);
+    }
+
+    // Include XML comments from Application project (for DTOs)
+    var appXmlFile = "Volet.Application.xml";
+    var appXmlPath = Path.Combine(AppContext.BaseDirectory, appXmlFile);
+    if (File.Exists(appXmlPath))
+    {
+        options.IncludeXmlComments(appXmlPath);
+    }
 
     // Configure JWT Bearer authentication in Swagger
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
